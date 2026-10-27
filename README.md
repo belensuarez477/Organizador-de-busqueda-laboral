@@ -1,1 +1,1 @@
-# Organizador-de-busqueda-laboral
+.\.venv\Scripts\Activate.ps1# Organizador-de-busqueda-laboral
