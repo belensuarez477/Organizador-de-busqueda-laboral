@@ -2,3 +2,12 @@
 **/__pycache__/
 *.py[cod]
 .env
+
+**/.venv/
+**/__pycache__/
+*.py[cod]
+.env
+
+/backend/organizador.db
+/backend/organizador.db-wal
+/backend/organizador.db-shm 
