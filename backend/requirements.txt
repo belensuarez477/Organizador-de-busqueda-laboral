@@ -4,5 +4,4 @@ sqlalchemy
 alembic
 pydantic
 databases
-sqlite3-binary
 python-dotenv
