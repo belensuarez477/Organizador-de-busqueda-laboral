@@ -12,7 +12,7 @@ class Postulacion(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     titulo: Mapped[str] = mapped_column(String(200))
     empresa: Mapped[str] = mapped_column(String(200))
-    estado: Mapped[str] = mapped_column(String(50), default="Pendiente")
+    estado: Mapped[str] = mapped_column(String(50), default="CV enviado")
     fecha_postulacion: Mapped[date] = mapped_column(Date)
     enlace: Mapped[str] = mapped_column(String(500))
     rol: Mapped[str] = mapped_column(String(100))
