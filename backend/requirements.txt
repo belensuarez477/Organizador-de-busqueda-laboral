@@ -5,3 +5,5 @@ alembic
 pydantic
 databases
 python-dotenv
+pytest
+httpx
