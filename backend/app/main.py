@@ -1,5 +1,6 @@
 from datetime import date, datetime, timezone
 from enum import Enum
+import unicodedata
 
 import fastapi
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
@@ -10,6 +11,9 @@ from app.database import get_db
 
 
 app = fastapi.FastAPI(title="Organizador de búsqueda laboral")
+
+# Además de letras: espacios y signos habituales en nombres (Jr., Back-end, AT&T)
+CARACTERES_PERMITIDOS = " .,-'&/()"
 
 
 class EstadoPostulacion(str, Enum):
@@ -23,12 +27,47 @@ class EstadoPostulacion(str, Enum):
 class PostulacionNueva(BaseModel):
     model_config = ConfigDict(use_enum_values=True)
 
-    titulo: str
-    empresa: str
+    titulo: str = Field(min_length=1, max_length=200)
+    empresa: str = Field(min_length=1, max_length=200)
     estado: EstadoPostulacion = EstadoPostulacion.CV_ENVIADO
     fecha_postulacion: date
-    enlace: str
-    rol: str
+    enlace: str = Field(min_length=1, max_length=500)
+    rol: str = Field(min_length=1, max_length=100)
+
+    @field_validator("titulo", mode="before")
+    @classmethod
+    def normalizar_titulo(cls, valor):
+        # Antes de validar el largo: recorta extremos y junta espacios repetidos
+        if isinstance(valor, str):
+            return " ".join(valor.split())
+        return valor
+
+    @field_validator("titulo")
+    @classmethod
+    def titulo_valido(cls, valor: str) -> str:
+        if any(unicodedata.category(c).startswith("C") for c in valor):
+            raise ValueError("Contiene caracteres de control no permitidos")
+        # RN-002: debe tener al menos una letra o un número
+        if not any(c.isalnum() for c in valor):
+            raise ValueError("Debe contener al menos una letra o un número")
+        return valor
+
+    @field_validator("empresa", "enlace", "rol")
+    @classmethod
+    def texto_no_vacio(cls, valor: str) -> str:
+        valor = valor.strip()
+        if not valor:
+            raise ValueError("No puede estar vacío")
+        return valor
+
+    @field_validator("empresa", "rol")
+    @classmethod
+    def sin_numeros(cls, valor: str) -> str:
+        if any(caracter.isdigit() for caracter in valor):
+            raise ValueError("No puede contener números")
+        if not all(c.isalpha() or c in CARACTERES_PERMITIDOS for c in valor):
+            raise ValueError("Solo puede contener letras")
+        return valor
 
 
 class PostulacionRespuesta(PostulacionNueva):
